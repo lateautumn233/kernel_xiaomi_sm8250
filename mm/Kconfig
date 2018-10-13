@@ -885,3 +885,11 @@ config FORCE_ALLOC_FROM_DMA_ZONE
 	  always using ZONE_DMA32 memory.
 
 	  If unsure, say "n".
+
+config LFS_MM_BDI_STRICTLIMIT_DIRTY
+	bool
+	default y if LFS_COMMON
+
+config VMSTAT_INTERVAL
+	int "Default interval in seconds to update vmstat"
+	default 1
