@@ -629,16 +629,6 @@ bool __weak arch_bpf_jit_check_func(const struct bpf_prog *prog)
 EXPORT_SYMBOL_GPL(arch_bpf_jit_check_func);
 #endif
 
-void *__weak bpf_jit_alloc_exec(unsigned long size)
-{
-	return module_alloc(size);
-}
-
-void __weak bpf_jit_free_exec(void *addr)
-{
-	module_memfree(addr);
-}
-
 struct bpf_binary_header *
 bpf_jit_binary_alloc(unsigned int proglen, u8 **image_ptr,
 		     unsigned int alignment,
@@ -656,7 +646,11 @@ bpf_jit_binary_alloc(unsigned int proglen, u8 **image_ptr,
 
 	if (bpf_jit_charge_modmem(pages))
 		return NULL;
-	hdr = bpf_jit_alloc_exec(size);
+#ifdef CONFIG_MODULES
+	hdr = module_alloc(size);
+#else
+	hdr = vmalloc_exec(size);
+#endif
 	if (!hdr) {
 		bpf_jit_uncharge_modmem(pages);
 		return NULL;
@@ -681,7 +675,11 @@ void bpf_jit_binary_free(struct bpf_binary_header *hdr)
 {
 	u32 pages = hdr->pages;
 
-	bpf_jit_free_exec(hdr);
+#ifdef CONFIG_MODULES
+	module_memfree(hdr);
+#else
+	vfree(hdr);
+#endif
 	bpf_jit_uncharge_modmem(pages);
 }
 
