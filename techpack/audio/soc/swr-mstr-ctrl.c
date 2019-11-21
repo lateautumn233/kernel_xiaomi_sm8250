@@ -2238,7 +2238,6 @@ static irqreturn_t swrm_wakeup_interrupt(int irq, void *dev)
 		return IRQ_NONE;
 	}
 
-	trace_printk("%s enter\n", __func__);
 	mutex_lock(&swrm->devlock);
 	if (!swrm->dev_up) {
 		if (swrm->wake_irq > 0) {
