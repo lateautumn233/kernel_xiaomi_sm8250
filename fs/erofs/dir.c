@@ -6,6 +6,24 @@
  */
 #include "internal.h"
 
+static unsigned char erofs_ftype_to_dtype(unsigned int ft)
+{
+	static const unsigned char erofs_filetype_table[] = {
+		DT_UNKNOWN,
+		DT_REG,
+		DT_DIR,
+		DT_CHR,
+		DT_BLK,
+		DT_FIFO,
+		DT_SOCK,
+		DT_LNK,
+	};
+
+	if (ft < ARRAY_SIZE(erofs_filetype_table))
+		return erofs_filetype_table[ft];
+	return DT_UNKNOWN;
+}
+
 static void debug_one_dentry(unsigned char d_type, const char *de_name,
 			     unsigned int de_namelen)
 {
@@ -33,7 +51,7 @@ static int erofs_fill_dentries(struct inode *dir, struct dir_context *ctx,
 		unsigned int de_namelen;
 		unsigned char d_type;
 
-		d_type = fs_ftype_to_dtype(de->file_type);
+		d_type = erofs_ftype_to_dtype(de->file_type);
 
 		nameoff = le16_to_cpu(de->nameoff);
 		de_name = (char *)dentry_blk + nameoff;

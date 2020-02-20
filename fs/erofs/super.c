@@ -103,6 +103,17 @@ static void erofs_free_inode(struct inode *inode)
 	kmem_cache_free(erofs_inode_cachep, vi);
 }
 
+static void erofs_i_callback(struct rcu_head *head)
+{
+	struct inode *inode = container_of(head, struct inode, i_rcu);
+	erofs_free_inode(inode);
+}
+
+static void erofs_destroy_inode(struct inode *inode)
+{
+	call_rcu(&inode->i_rcu, erofs_i_callback);
+}
+
 static bool check_layout_compatibility(struct super_block *sb,
 				       struct erofs_super_block *dsb)
 {
@@ -629,7 +640,7 @@ out:
 const struct super_operations erofs_sops = {
 	.put_super = erofs_put_super,
 	.alloc_inode = erofs_alloc_inode,
-	.free_inode = erofs_free_inode,
+	.destroy_inode = erofs_destroy_inode,
 	.statfs = erofs_statfs,
 	.show_options = erofs_show_options,
 	.remount_fs = erofs_remount,

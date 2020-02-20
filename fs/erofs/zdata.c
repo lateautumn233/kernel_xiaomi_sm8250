@@ -7,6 +7,7 @@
 #include "zdata.h"
 #include "compress.h"
 #include <linux/prefetch.h>
+#include <linux/mm_inline.h>
 
 #include <trace/events/erofs.h>
 
@@ -712,13 +713,13 @@ static void z_erofs_decompress_kickoff(struct z_erofs_decompressqueue *io,
 
 static void z_erofs_decompressqueue_endio(struct bio *bio)
 {
+	int i;
 	tagptr1_t t = tagptr_init(tagptr1_t, bio->bi_private);
 	struct z_erofs_decompressqueue *q = tagptr_unfold_ptr(t);
 	blk_status_t err = bio->bi_status;
 	struct bio_vec *bvec;
-	struct bvec_iter_all iter_all;
 
-	bio_for_each_segment_all(bvec, bio, iter_all) {
+	bio_for_each_segment_all(bvec, bio, i) {
 		struct page *page = bvec->bv_page;
 
 		DBG_BUGON(PageUptodate(page));
