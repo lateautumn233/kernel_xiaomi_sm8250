@@ -35,7 +35,7 @@ asmlinkage long sys_ni_syscall(void)
  * Architecture specific entries go below, followed by deprecated or obsolete
  * system calls.
  */
-
+COND_SYSCALL(process_madvise);
 COND_SYSCALL(io_setup);
 COND_SYSCALL_COMPAT(io_setup);
 COND_SYSCALL(io_destroy);
