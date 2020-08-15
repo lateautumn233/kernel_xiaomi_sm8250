@@ -9,6 +9,7 @@
 #include <linux/of.h>
 #include <linux/sched/core_ctl.h>
 #include <trace/events/sched.h>
+#include <linux/binfmts.h>
 
 /*
  * Scheduler boost is a mechanism to temporarily place tasks on CPUs
@@ -281,6 +282,9 @@ int sched_boost_handler(struct ctl_table *table, int write,
 {
 	int ret;
 	unsigned int *data = (unsigned int *)table->data;
+	
+	if (task_is_booster(current))
+		return 0;
 
 	mutex_lock(&boost_mutex);
 
