@@ -235,4 +235,6 @@ source "drivers/energy_model/Kconfig"
 
 source "drivers/fragmention/Kconfig"
 
+source "drivers/data-kernel/Kconfig"
+
 endmenu
