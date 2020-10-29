@@ -715,3 +715,11 @@
 	no-map;
 	reg = <0x0 0xb0400000 0x0 0x01000000>;
 };
+
+&dump_mem {
+    status = "disabled";
+};
+
+&mem_dump {
+    status = "disabled";
+};
