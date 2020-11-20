@@ -3265,6 +3265,8 @@
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
 
+		arm,coresight-loses-context-with-cpu;
+
 		port {
 			etm0_out_funnel_apss: endpoint {
 				remote-endpoint = <&funnel_apss_in_etm0>;
@@ -3284,6 +3286,8 @@
 
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
+
+		arm,coresight-loses-context-with-cpu;
 
 		port {
 			etm1_out_funnel_apss: endpoint {
@@ -3305,6 +3309,8 @@
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
 
+		arm,coresight-loses-context-with-cpu;
+
 		port {
 			etm2_out_funnel_apss: endpoint {
 				remote-endpoint = <&funnel_apss_in_etm2>;
@@ -3324,6 +3330,8 @@
 
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
+
+		arm,coresight-loses-context-with-cpu;
 
 		port {
 			etm3_out_funnel_apss: endpoint {
@@ -3345,6 +3353,8 @@
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
 
+		arm,coresight-loses-context-with-cpu;
+
 		port {
 			etm4_out_funnel_apss: endpoint {
 				remote-endpoint = <&funnel_apss_in_etm4>;
@@ -3364,6 +3374,8 @@
 
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
+
+		arm,coresight-loses-context-with-cpu;
 
 		port {
 			etm5_out_funnel_apss: endpoint {
@@ -3385,6 +3397,8 @@
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
 
+		arm,coresight-loses-context-with-cpu;
+
 		port {
 			etm6_out_funnel_apss: endpoint {
 				remote-endpoint = <&funnel_apss_in_etm6>;
@@ -3404,6 +3418,8 @@
 
 		clocks = <&clock_aop QDSS_CLK>;
 		clock-names = "apb_pclk";
+
+		arm,coresight-loses-context-with-cpu;
 
 		port {
 			etm7_out_funnel_apss: endpoint {
