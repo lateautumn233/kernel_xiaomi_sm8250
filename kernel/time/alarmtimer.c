@@ -295,7 +295,7 @@ static int alarmtimer_suspend(struct device *dev)
 		return 0;
 
 	if (ktime_to_ns(min) < 2 * NSEC_PER_SEC) {
-		__pm_wakeup_event(ws, 2 * MSEC_PER_SEC);
+		__pm_wakeup_event(ws, MSEC_PER_SEC / 2);
 		if (min_timer) {
 			pr_info("[oem][alarm]: [%p]type=%d, func=%pf\n", min_timer, min_timer->type, min_timer->function);
 		}
@@ -313,7 +313,7 @@ static int alarmtimer_suspend(struct device *dev)
 	/* Set alarm, if in the past reject suspend briefly to handle */
 	ret = rtc_timer_start(rtc, &rtctimer, now, 0);
 	if (ret < 0)
-		__pm_wakeup_event(ws, MSEC_PER_SEC);
+ 		__pm_wakeup_event(ws, MSEC_PER_SEC / 2);
 	return ret;
 }
 
