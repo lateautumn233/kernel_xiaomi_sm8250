@@ -1,0 +1,33 @@
+44:	struct msm_kms *kms = priv->kms;
+130:	struct msm_kms *kms = priv->kms;
+346:	struct msm_kms *kms = priv->kms;
+474:	struct msm_kms *kms = priv->kms;
+505:	struct msm_kms *kms = priv->kms;
+542:	priv->complete_commit_time = ktime_get()/1000;
+549:	spin_lock(&priv->pending_crtcs_event.lock);
+551:	priv->pending_crtcs &= ~crtc_mask;
+552:	priv->pending_planes &= ~plane_mask;
+553:	wake_up_all_locked(&priv->pending_crtcs_event);
+554:	spin_unlock(&priv->pending_crtcs_event.lock);
+577:		kthread_queue_work(&priv->clean_thread.worker, &c->commit_work);
+618:		for (j = 0; j < priv->num_crtcs; j++) {
+619:			if (priv->disp_thread[j].crtc_id ==
+621:				if (priv->disp_thread[j].thread) {
+623:						&priv->disp_thread[j].worker,
+631:						priv->disp_thread[j].crtc_id);
+643:		if (j < priv->num_crtcs)
+693:	if (!priv || priv->shutdown_in_progress) {
+750:	if (!atomic_cmpxchg_acquire(&priv->pm_req_set, 1, 0))
+751:		pm_qos_update_request(&priv->pm_irq_req, 100);
+752:	mod_delayed_work(system_unbound_wq, &priv->pm_unreq_dwork, HZ / 10);
+755:	spin_lock(&priv->pending_crtcs_event.lock);
+756:	ret = wait_event_interruptible_locked(priv->pending_crtcs_event,
+757:			!(priv->pending_crtcs & c->crtc_mask) &&
+758:			!(priv->pending_planes & c->plane_mask));
+761:		priv->pending_crtcs |= c->crtc_mask;
+762:		priv->pending_planes |= c->plane_mask;
+764:	spin_unlock(&priv->pending_crtcs_event.lock);
+777:	if (priv && priv->kms && priv->kms->funcs &&
+778:			priv->kms->funcs->prepare_fence)
+779:		priv->kms->funcs->prepare_fence(priv->kms, state);
+843:	struct msm_kms *kms = priv->kms;
