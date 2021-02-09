@@ -362,6 +362,10 @@ static unsigned long sugov_get_util(struct sugov_cpu *sg_cpu)
 	sg_cpu->bw_dl = cpu_bw_dl(rq);
 
 	return stune_util(sg_cpu->cpu, 0, &sg_cpu->walt_load);
+
+#ifdef CONFIG_UCLAMP_TASK
+	*util = uclamp_util_with(rq, *util, NULL);
+#endif
 }
 #else
 static unsigned long sugov_get_util(struct sugov_cpu *sg_cpu)
