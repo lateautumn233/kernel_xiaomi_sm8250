@@ -64,6 +64,7 @@ static struct wakeup_source *ws;
 static struct rtc_timer		rtctimer;
 static struct rtc_device	*rtcdev;
 static DEFINE_SPINLOCK(rtcdev_lock);
+bool alarm_fired;
 
 /**
  * alarmtimer_get_rtcdev - Return selected rtcdevice
