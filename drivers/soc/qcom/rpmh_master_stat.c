@@ -116,6 +116,7 @@ static ssize_t msm_rpmh_master_stats_print_data(char *prvbuf, ssize_t length,
 			"\tSleep Last Entered At:0x%llx\n"
 			"\tSleep Last Exited At:0x%llx\n"
 			"\tSleep Accumulated Duration:0x%llx\n\n",
+			"\tSleep Status:%d\n\n",
 			name, record->version_id, record->counts,
 			record->last_entered, record->last_exited,
 			accumulated_duration);
