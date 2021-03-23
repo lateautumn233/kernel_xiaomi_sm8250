@@ -1381,6 +1381,9 @@ void typec_set_pwr_opmode(struct typec_port *port,
 	if (port->pwr_opmode == opmode)
 		return;
 
+	if (opmode > TYPEC_PWR_MODE_PD)
+		return;
+
 	port->pwr_opmode = opmode;
 	sysfs_notify(&port->dev.kobj, NULL, "power_operation_mode");
 	kobject_uevent(&port->dev.kobj, KOBJ_CHANGE);
