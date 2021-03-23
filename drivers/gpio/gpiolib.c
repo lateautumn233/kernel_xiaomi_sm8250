@@ -1632,7 +1632,7 @@ static int gpiochip_match_name(struct gpio_chip *chip, void *data)
 	return !strcmp(chip->label, name);
 }
 
-static struct gpio_chip *find_chip_by_name(const char *name)
+struct gpio_chip *find_chip_by_name(const char *name)
 {
 	return gpiochip_find((void *)name, gpiochip_match_name);
 }
@@ -4492,5 +4492,9 @@ static int __init gpiolib_debugfs_init(void)
 	return 0;
 }
 subsys_initcall(gpiolib_debugfs_init);
-
+#else
+void gpio_debug_print(void)
+{
+}
+EXPORT_SYMBOL_GPL(gpio_debug_print);
 #endif	/* DEBUG_FS */
