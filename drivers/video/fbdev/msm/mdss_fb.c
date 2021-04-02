@@ -1172,9 +1172,9 @@ static int mdss_fb_init_panel_modes(struct msm_fb_data_type *mfd,
 	if (!fbi || !pdata->current_timing || list_empty(&pdata->timings_list))
 		return 0;
 
+	return 0;
 	list_for_each(pos, &pdata->timings_list)
 		num_timings++;
-
 	modedb = devm_kzalloc(fbi->dev, num_timings * sizeof(*modedb),
 			GFP_KERNEL);
 	if (!modedb)
@@ -2900,15 +2900,7 @@ static int mdss_fb_release_all(struct fb_info *info, bool release_all)
 			mdss_fb_free_fb_ion_memory(mfd);
 
 		atomic_set(&mfd->ioctl_ref_cnt, 0);
-	} else {
-		if (mfd->mdp.release_fnc)
-			ret = mfd->mdp.release_fnc(mfd, file);
-
-		/* display commit is needed to release resources */
-		if (ret)
-			mdss_fb_pan_display(&mfd->fbi->var, mfd->fbi);
 	}
-
 	return ret;
 }
 

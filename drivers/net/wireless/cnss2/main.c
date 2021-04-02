@@ -360,6 +360,24 @@ int cnss_set_fw_log_mode(struct device *dev, u8 fw_log_mode)
 }
 EXPORT_SYMBOL(cnss_set_fw_log_mode);
 
+int cnss_set_pcie_gen_speed(struct device *dev, u8 pcie_gen_speed)
+{
+	struct cnss_plat_data *plat_priv = cnss_bus_dev_to_plat_priv(dev);
+
+	if (plat_priv->device_id != QCA6490_DEVICE_ID ||
+	    !plat_priv->fw_pcie_gen_switch)
+		return -ENOTSUPP;
+
+	if (pcie_gen_speed < QMI_PCIE_GEN_SPEED_1_V01 ||
+	    pcie_gen_speed > QMI_PCIE_GEN_SPEED_3_V01)
+		return -EINVAL;
+
+	cnss_pr_dbg("WLAN provided PCIE gen speed: %d\n", pcie_gen_speed);
+	plat_priv->pcie_gen_speed = pcie_gen_speed;
+	return 0;
+}
+EXPORT_SYMBOL(cnss_set_pcie_gen_speed);
+
 static int cnss_fw_mem_ready_hdlr(struct cnss_plat_data *plat_priv)
 {
 	int ret = 0;
@@ -435,6 +453,8 @@ static int cnss_fw_ready_hdlr(struct cnss_plat_data *plat_priv)
 	del_timer(&plat_priv->fw_boot_timer);
 	set_bit(CNSS_FW_READY, &plat_priv->driver_state);
 	clear_bit(CNSS_DEV_ERR_NOTIFY, &plat_priv->driver_state);
+
+	cnss_wlfw_send_pcie_gen_speed_sync(plat_priv);
 
 	if (test_bit(CNSS_FW_BOOT_RECOVERY, &plat_priv->driver_state)) {
 		clear_bit(CNSS_FW_BOOT_RECOVERY, &plat_priv->driver_state);
@@ -700,6 +720,14 @@ int cnss_idle_restart(struct device *dev)
 	ret = wait_for_completion_timeout(&plat_priv->power_up_complete,
 					  msecs_to_jiffies((timeout << 1) +
 							   WLAN_WD_TIMEOUT_MS));
+	if (plat_priv->power_up_error) {
+		ret = plat_priv->power_up_error;
+		clear_bit(CNSS_DRIVER_IDLE_RESTART, &plat_priv->driver_state);
+		cnss_pr_dbg("Power up error:%d, exiting\n",
+			    plat_priv->power_up_error);
+		goto out;
+	}
+
 	if (!ret) {
 		cnss_pr_err("Timeout waiting for idle restart to complete\n");
 		ret = -ETIMEDOUT;
@@ -1004,6 +1032,7 @@ static void cnss_recovery_work_handler(struct work_struct *work)
 		panic("subsys-restart: Resetting the SoC wlan crashed\n");
 
 	cnss_bus_dev_shutdown(plat_priv);
+	cnss_bus_dev_ramdump(plat_priv);
 	msleep(RECOVERY_DELAY_MS);
 	cnss_bus_dev_powerup(plat_priv);
 }
@@ -1102,6 +1131,11 @@ static int cnss_do_recovery(struct cnss_plat_data *plat_priv,
 self_recovery:
 	cnss_pr_dbg("Going for self recovery\n");
 	cnss_bus_dev_shutdown(plat_priv);
+
+	if (test_bit(LINK_DOWN_SELF_RECOVERY, &plat_priv->ctrl_params.quirks))
+		clear_bit(LINK_DOWN_SELF_RECOVERY,
+			  &plat_priv->ctrl_params.quirks);
+
 	cnss_bus_dev_powerup(plat_priv);
 
 	return 0;
@@ -1184,7 +1218,8 @@ void cnss_schedule_recovery(struct device *dev,
 	struct cnss_recovery_data *data;
 	int gfp = GFP_KERNEL;
 
-	if (!test_bit(CNSS_DEV_ERR_NOTIFY, &plat_priv->driver_state))
+	if (!test_bit(CNSS_DEV_ERR_NOTIFY, &plat_priv->driver_state) &&
+	    test_bit(CNSS_QMI_WLFW_CONNECTED, &plat_priv->driver_state))
 		cnss_bus_update_status(plat_priv, CNSS_FW_DOWN);
 
 	if (test_bit(CNSS_DRIVER_UNLOADING, &plat_priv->driver_state) ||
@@ -1755,6 +1790,69 @@ static void cnss_destroy_ramdump_device(struct cnss_plat_data *plat_priv,
 {
 	destroy_ramdump_device(ramdump_dev);
 }
+
+int cnss_do_ramdump(struct cnss_plat_data *plat_priv)
+{
+	struct cnss_ramdump_info *ramdump_info = &plat_priv->ramdump_info;
+	struct ramdump_segment segment;
+
+	memset(&segment, 0, sizeof(segment));
+	segment.v_address = ramdump_info->ramdump_va;
+	segment.size = ramdump_info->ramdump_size;
+
+	return do_ramdump(ramdump_info->ramdump_dev, &segment, 1);
+}
+
+int cnss_do_elf_ramdump(struct cnss_plat_data *plat_priv)
+{
+	struct cnss_ramdump_info_v2 *info_v2 = &plat_priv->ramdump_info_v2;
+	struct cnss_dump_data *dump_data = &info_v2->dump_data;
+	struct cnss_dump_seg *dump_seg = info_v2->dump_data_vaddr;
+	struct ramdump_segment *ramdump_segs, *s;
+	struct cnss_dump_meta_info meta_info = {0};
+	int i, ret = 0;
+
+	ramdump_segs = kcalloc(dump_data->nentries + 1,
+			       sizeof(*ramdump_segs),
+			       GFP_KERNEL);
+	if (!ramdump_segs)
+		return -ENOMEM;
+
+	s = ramdump_segs + 1;
+	for (i = 0; i < dump_data->nentries; i++) {
+		if (dump_seg->type >= CNSS_FW_DUMP_TYPE_MAX) {
+			cnss_pr_err("Unsupported dump type: %d",
+				    dump_seg->type);
+			continue;
+		}
+
+		if (meta_info.entry[dump_seg->type].entry_start == 0) {
+			meta_info.entry[dump_seg->type].type = dump_seg->type;
+			meta_info.entry[dump_seg->type].entry_start = i + 1;
+		}
+		meta_info.entry[dump_seg->type].entry_num++;
+
+		s->address = dump_seg->address;
+		s->v_address = dump_seg->v_address;
+		s->size = dump_seg->size;
+		s++;
+		dump_seg++;
+	}
+
+	meta_info.magic = CNSS_RAMDUMP_MAGIC;
+	meta_info.version = CNSS_RAMDUMP_VERSION;
+	meta_info.chipset = plat_priv->device_id;
+	meta_info.total_entries = CNSS_FW_DUMP_TYPE_MAX;
+
+	ramdump_segs->v_address = &meta_info;
+	ramdump_segs->size = sizeof(meta_info);
+
+	ret = do_elf_ramdump(info_v2->ramdump_dev, ramdump_segs,
+			     dump_data->nentries + 1);
+	kfree(ramdump_segs);
+
+	return ret;
+}
 #else
 static int cnss_panic_handler(struct notifier_block *nb, unsigned long action,
 			      void *data)
@@ -1804,6 +1902,86 @@ static void cnss_destroy_ramdump_device(struct cnss_plat_data *plat_priv,
 					void *ramdump_dev)
 {
 }
+
+#ifdef CONFIG_SUBSYSTEM_RAMDUMP
+int cnss_do_ramdump(struct cnss_plat_data *plat_priv)
+{
+	struct cnss_ramdump_info *ramdump_info = &plat_priv->ramdump_info;
+	struct qcom_dump_segment segment;
+	struct list_head head;
+
+	INIT_LIST_HEAD(&head);
+	memset(&segment, 0, sizeof(segment));
+	segment.va = ramdump_info->ramdump_va;
+	segment.size = ramdump_info->ramdump_size;
+	list_add(&segment.node, &head);
+
+	return do_dump(&head, ramdump_info->ramdump_dev);
+}
+
+int cnss_do_elf_ramdump(struct cnss_plat_data *plat_priv)
+{
+	struct cnss_ramdump_info_v2 *info_v2 = &plat_priv->ramdump_info_v2;
+	struct cnss_dump_data *dump_data = &info_v2->dump_data;
+	struct cnss_dump_seg *dump_seg = info_v2->dump_data_vaddr;
+	struct qcom_dump_segment *seg;
+	struct cnss_dump_meta_info meta_info = {0};
+	struct list_head head;
+	int i, ret = 0;
+
+	INIT_LIST_HEAD(&head);
+	for (i = 0; i < dump_data->nentries; i++) {
+		if (dump_seg->type >= CNSS_FW_DUMP_TYPE_MAX) {
+			cnss_pr_err("Unsupported dump type: %d",
+				    dump_seg->type);
+			continue;
+		}
+
+		if (meta_info.entry[dump_seg->type].entry_start == 0) {
+			meta_info.entry[dump_seg->type].type = dump_seg->type;
+			meta_info.entry[dump_seg->type].entry_start = i + 1;
+		}
+		meta_info.entry[dump_seg->type].entry_num++;
+
+		seg = kcalloc(1, sizeof(*seg), GFP_KERNEL);
+		seg->da = dump_seg->address;
+		seg->va = dump_seg->v_address;
+		seg->size = dump_seg->size;
+		list_add_tail(&seg->node, &head);
+		dump_seg++;
+	}
+
+	meta_info.magic = CNSS_RAMDUMP_MAGIC;
+	meta_info.version = CNSS_RAMDUMP_VERSION;
+	meta_info.chipset = plat_priv->device_id;
+	meta_info.total_entries = CNSS_FW_DUMP_TYPE_MAX;
+
+	seg = kcalloc(1, sizeof(*seg), GFP_KERNEL);
+	seg->va = &meta_info;
+	seg->size = sizeof(meta_info);
+	list_add(&seg->node, &head);
+
+	ret = do_elf_dump(&head, info_v2->ramdump_dev);
+
+	while (!list_empty(&head)) {
+		seg = list_first_entry(&head, struct qcom_dump_segment, node);
+		list_del(&seg->node);
+		kfree(seg);
+	}
+
+	return ret;
+}
+#else
+int cnss_do_ramdump(struct cnss_plat_data *plat_priv)
+{
+	return 0;
+}
+
+int cnss_do_elf_ramdump(struct cnss_plat_data *plat_priv)
+{
+	return 0;
+}
+#endif /* CONFIG_SUBSYSTEM_RAMDUMP */
 #endif /* CONFIG_MSM_SUBSYSTEM_RESTART */
 
 static int cnss_init_dump_entry(struct cnss_plat_data *plat_priv)

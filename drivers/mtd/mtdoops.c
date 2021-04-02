@@ -385,6 +385,7 @@ static void mtdoops_do_dump(struct kmsg_dumper *dumper,
 
 	/* Panics must be written immediately */
 	if (reason == KMSG_DUMP_OOPS || reason == KMSG_DUMP_PANIC || reason == KMSG_DUMP_LONG_PRESS) {
+		/* Panics must be written immediately */
 		mtdoops_write(cxt, 1);
 	} else {
 		/* For other cases, schedule work to write it "nicely" */
