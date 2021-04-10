@@ -401,6 +401,9 @@ void mhi_deinit_free_irq(struct mhi_controller *mhi_cntrl)
 	int i;
 	struct mhi_event *mhi_event = mhi_cntrl->mhi_event;
 
+	if (mhi_cntrl->irq == NULL)
+		return;
+
 	for (i = 0; i < mhi_cntrl->total_ev_rings; i++, mhi_event++) {
 		if (!mhi_event->request_irq)
 			continue;
@@ -460,6 +463,9 @@ void mhi_deinit_dev_ctxt(struct mhi_controller *mhi_cntrl)
 	struct mhi_cmd *mhi_cmd;
 	struct mhi_event *mhi_event;
 	struct mhi_ring *ring;
+
+	if (mhi_ctxt == NULL)
+		return;
 
 	mhi_cmd = mhi_cntrl->mhi_cmd;
 	for (i = 0; i < NR_OF_CMD_RINGS; i++, mhi_cmd++) {

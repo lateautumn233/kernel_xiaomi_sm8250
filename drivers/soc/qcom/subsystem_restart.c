@@ -786,7 +786,7 @@ static int subsystem_powerup(struct subsys_device *dev, void *data)
 			|| system_state == SYSTEM_POWER_OFF)
 			WARN(1, "SSR aborted: %s, system reboot/shutdown is under way\n",
 				name);
-		else if (!dev->desc->ignore_ssr_failure)
+		else if (!dev->desc->ignore_ssr_failure && strcmp(name, "esoc0"))
 			panic("[%s:%d]: Powerup error: %s!",
 				current->comm, current->pid, name);
 		else
