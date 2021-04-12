@@ -1,0 +1,41 @@
+---
+
+kind: pipeline
+
+name: lateautumn CI
+
+platform:
+
+  os: linux
+
+  arch: amd64
+
+clone:
+
+  depth: 1
+
+steps:
+
+  - name: build
+
+    image: ubuntu:20.10
+
+    environment:
+
+      GIT_SECRET:
+
+        from_secret: GIT_SECRET
+
+    commands:
+
+      - apt update && apt install -y curl liblz4-1 libyaml-0-2 p7zip-full gcc g++ bison bc make git zip flex zipalign libssl-dev python python3 gcc-aarch64-linux-gnu cpio gcc-arm-linux-gnueabi
+
+      - git clone https://github.com/lateautumn233/build-scripts /drone/build-tools/build-scripts --branch apollo --depth 1
+
+      - git clone https://github.com/kdrag0n/proton-clang /drone/build-tools/proton-clang --depth 1
+
+      - git clone https://github.com/lateautumn233/AnyKernel3 /drone/build-tools/anykernel --branch apollo --depth 1
+
+      - git submodule init && git submodule update
+
+      - bash /drone/build-tools/build-scripts/build.sh
