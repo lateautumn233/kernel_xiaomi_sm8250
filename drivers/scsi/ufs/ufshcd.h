@@ -72,6 +72,7 @@
 #include <scsi/scsi_tcq.h>
 #include <scsi/scsi_dbg.h>
 #include <scsi/scsi_eh.h>
+#include <linux/android_kabi.h>
 
 #include <linux/fault-inject.h>
 

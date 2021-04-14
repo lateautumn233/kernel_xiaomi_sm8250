@@ -61,6 +61,7 @@ static int gc_thread_func(void *data)
 
 	set_freezable();
 	do {
+	bool sync_mode;
 		wait_event_interruptible_timeout(*wq,
 				kthread_should_stop() || freezing(current) ||
 				gc_th->gc_wake,
@@ -145,6 +146,8 @@ static int gc_thread_func(void *data)
 			increase_sleep_time(gc_th, &wait_ms);
 do_gc:
 		stat_inc_bggc_count(sbi->stat_info);
+
+        sync_mode = F2FS_OPTION(sbi).bggc_mode;
 
 		/* if return value is not zero, no victim was selected */
 		if (f2fs_gc(sbi, sbi->rapid_gc || sync_mode, true, NULL_SEGNO)) {

@@ -139,6 +139,7 @@ struct f2fs_mount_info {
 #endif
 	/* For which write hints are passed down to block layer */
 	int whint_mode;
+	int bggc_mode;			/* bggc mode: off, on or sync */
 	int alloc_mode;			/* segment allocation policy */
 	int fsync_mode;			/* fsync policy */
 	bool test_dummy_encryption;	/* test dummy encryption */
@@ -1513,6 +1514,10 @@ struct f2fs_sb_info {
 	spinlock_t iostat_lock;
 	unsigned long long write_iostat[NR_IO_TYPE];
 	bool iostat_enable;
+
+	/* to attach REQ_META|REQ_FUA flags */
+	unsigned int data_io_flag;
+	unsigned int node_io_flag;
 
 	/* For sysfs suppport */
 	struct kobject s_kobj;
