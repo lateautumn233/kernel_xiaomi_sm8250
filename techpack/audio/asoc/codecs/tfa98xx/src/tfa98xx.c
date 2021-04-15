@@ -432,7 +432,6 @@ static void tfa98xx_inputdev_unregister(struct tfa98xx *tfa98xx)
 	__tfa98xx_inputdev_check_register(tfa98xx, true);
 }
 
-#ifdef CONFIG_DEBUG_FS
 /* OTC reporting
  * Returns the MTP0 OTC bit value
  */
@@ -1024,7 +1023,6 @@ static void tfa98xx_debug_remove(struct tfa98xx *tfa98xx)
 	if (tfa98xx->dbg_dir)
 		debugfs_remove_recursive(tfa98xx->dbg_dir);
 }
-#endif
 
 
 /* copies the profile basename (i.e. part until .) into buf */
@@ -4330,10 +4328,8 @@ static int tfa98xx_i2c_probe(struct i2c_client *i2c,
 		tfa98xx->flags |= TFA98XX_FLAG_SKIP_INTERRUPTS;
 	}
 
-#ifdef CONFIG_DEBUG_FS
 	if (no_start == 0)
 		tfa98xx_debug_init(tfa98xx, i2c);
-#endif
 	/* Register the sysfs files for climax backdoor access */
 	ret = device_create_bin_file(&i2c->dev, &dev_attr_rw);
 	if (ret)
@@ -4370,9 +4366,7 @@ static int tfa98xx_i2c_remove(struct i2c_client *i2c)
 
 	device_remove_bin_file(&i2c->dev, &dev_attr_reg);
 	device_remove_bin_file(&i2c->dev, &dev_attr_rw);
-#ifdef CONFIG_DEBUG_FS
 	tfa98xx_debug_remove(tfa98xx);
-#endif
 	tfa98xx_remove_misc_device(tfa98xx);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4,18,0)

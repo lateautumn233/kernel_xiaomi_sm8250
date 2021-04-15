@@ -171,9 +171,7 @@ struct tfa98xx {
 	int profile;
 	int prof_vsteps[TFACONT_MAXPROFS]; /* store vstep per profile (single device) */
 
-#ifdef CONFIG_DEBUG_FS
 	struct dentry *dbg_dir;
-#endif
 	u8 reg;
 	unsigned int flags;
 	bool set_mtp_cal;
