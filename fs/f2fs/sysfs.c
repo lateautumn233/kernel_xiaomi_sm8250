@@ -902,7 +902,7 @@ int __init f2fs_init_sysfs(void)
 {
 	int ret;
 
-	kobject_set_name(&f2fs_kset.kobj, "f2fs_dev");
+	kobject_set_name(&f2fs_kset.kobj, "f2fs");
 	f2fs_kset.kobj.parent = fs_kobj;
 	ret = kset_register(&f2fs_kset);
 	if (ret)
@@ -913,8 +913,9 @@ int __init f2fs_init_sysfs(void)
 	if (ret) {
 		kobject_put(&f2fs_feat);
 		kset_unregister(&f2fs_kset);
-	} else
-		f2fs_proc_root = proc_mkdir("fs/f2fs_dev", NULL);
+	} else {
+		f2fs_proc_root = proc_mkdir("fs/f2fs", NULL);
+	}
 	return ret;
 }
 
@@ -922,7 +923,7 @@ void f2fs_exit_sysfs(void)
 {
 	kobject_put(&f2fs_feat);
 	kset_unregister(&f2fs_kset);
-	remove_proc_entry("fs/f2fs_dev", NULL);
+	remove_proc_entry("fs/f2fs", NULL);
 	f2fs_proc_root = NULL;
 }
 
