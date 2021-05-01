@@ -634,7 +634,6 @@ bool schedtune_prefer_high_cap(struct task_struct *p)
 	/* Get prefer_high_cap value */
 	rcu_read_lock();
 	st = task_schedtune(p);
-	prefer_idle = st->prefer_idle;
 	if (sched_boost_top_app() && 1 == st->sched_boost_no_override) {
 	prefer_high_cap = st->prefer_high_cap;
 	}
