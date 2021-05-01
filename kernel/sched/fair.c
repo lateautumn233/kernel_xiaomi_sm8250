@@ -8229,6 +8229,7 @@ fail:
 eas_not_ready:
 	return -1;
 }
+ return 0;
 }
 /*
  * select_task_rq_fair: Select target runqueue for the waking task in domains
