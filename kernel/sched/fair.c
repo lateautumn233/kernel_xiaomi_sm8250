@@ -8229,7 +8229,7 @@ fail:
 eas_not_ready:
 	return -1;
 }
-
+}
 /*
  * select_task_rq_fair: Select target runqueue for the waking task in domains
  * that have the 'sd_flag' flag set. In practice, this is SD_BALANCE_WAKE,
