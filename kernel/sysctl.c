@@ -1410,7 +1410,7 @@ static struct ctl_table kern_table[] = {
 		.procname	= "randomize_va_space",
 		.data		= &randomize_va_space,
 		.maxlen		= sizeof(int),
-		.mode		= 0644,
+		.mode		= 0444,
 		.proc_handler	= proc_dointvec,
 	},
 #endif
