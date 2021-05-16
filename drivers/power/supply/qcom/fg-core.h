@@ -528,6 +528,7 @@ struct fg_dev {
 	bool			empty_restart_fg;
 	bool			report_full;
 	bool			profile_already_find;
+	bool			input_present;
 	bool			shutdown_delay;
 	enum fg_version		version;
 	struct batt_params	param;
