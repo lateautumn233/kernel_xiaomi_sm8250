@@ -716,7 +716,6 @@ void f2fs_evict_inode(struct inode *inode)
 
 	f2fs_destroy_extent_tree(inode);
 
-
 	if (inode->i_nlink || is_bad_inode(inode))
 		goto no_delete;
 
