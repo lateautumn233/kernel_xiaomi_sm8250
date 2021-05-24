@@ -6,16 +6,22 @@ ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
                 kona-mtp-ws-overlay.dtbo \
 		kona-sa-mtp-overlay.dtbo \
                 kona-xr-overlay.dtbo \
-                umi-sm8250-overlay.dtbo \
-                cmi-sm8250-overlay.dtbo \
-                lmi-sm8250-overlay.dtbo \
-                cas-sm8250-overlay.dtbo \
-                apollo-sm8250-overlay.dtbo \
                 kona-rumi-overlay.dtbo \
                 kona-qrd-overlay.dtbo \
 		kona-xrfusion-overlay.dtbo \
 		kona-xrfusion-ult-overlay.dtbo \
                 kona-hdk-overlay.dtbo
+
+	dtbo-$(CONFIG_MACH_XIAOMI_UMI) += \
+		umi-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_CMI) += \
+		cmi-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_LMI) += \
+		lmi-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_CAS) += \
+		cas-sm8250-overlay.dtbo
+	dtbo-$(CONFIG_MACH_XIAOMI_APOLLO) += \
+		apollo-sm8250-overlay.dtbo
 
 kona-cdp-overlay.dtbo-base := kona-v2.1.dtb
 kona-cdp-lcd-overlay.dtbo-base := kona-v2.1.dtb
