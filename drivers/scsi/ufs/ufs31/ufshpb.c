@@ -35,9 +35,9 @@
  * license terms, and distributes only under these terms.
  */
 
-#include "ufshcd.h"
+#include "../ufshcd.h"
 #include "ufshpb.h"
-#include "ufshcd-crypto.h"
+#include "../ufshcd-crypto.h"
 
 #define UFSHCD_REQ_SENSE_SIZE	18
 

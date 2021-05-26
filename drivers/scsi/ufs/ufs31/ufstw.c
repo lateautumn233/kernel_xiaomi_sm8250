@@ -37,7 +37,7 @@
 
 #include <uapi/scsi/ufs/ufs.h>
 
-#include "ufshcd.h"
+#include "../ufshcd.h"
 #include "ufstw.h"
 
 static int ufstw_create_sysfs(struct ufsf_feature *ufsf, struct ufstw_lu *tw);
