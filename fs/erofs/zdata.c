@@ -2,7 +2,6 @@
 /*
  * Copyright (C) 2018 HUAWEI, Inc.
  *             https://www.huawei.com/
- * Created by Gao Xiang <gaoxiang25@huawei.com>
  */
 #include "zdata.h"
 #include "compress.h"
@@ -1372,4 +1371,3 @@ const struct address_space_operations z_erofs_aops = {
 	.readpage = z_erofs_readpage,
 	.readpages = z_erofs_readpages,
 };
-
