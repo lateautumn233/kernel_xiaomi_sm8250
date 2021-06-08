@@ -73,18 +73,6 @@
 #define ACCL_TYPE(addr)			((addr >> 16) & 0xF)
 #define NR_ACCL_TYPES			3
 
-#define rpmh_spin_lock(lock)				\
-do {	\
-	if (!oops_in_progress)\
-		spin_lock(lock);	\
-} while (0)
-
-#define rpmh_spin_unlock(lock)				\
-do {	\
-	if (!oops_in_progress)\
-		spin_unlock(lock);	\
-} while (0)
-
 static const char * const accl_str[] = {
 	"", "", "", "CLK", "VREG", "BUS",
 };
@@ -140,7 +128,7 @@ static int tcs_invalidate(struct rsc_drv *drv, int type)
 
 	tcs = get_tcs_of_type(drv, type);
 
-	rpmh_spin_lock(&drv->lock);
+	spin_lock(&drv->lock);
 	if (bitmap_empty(tcs->slots, MAX_TCS_SLOTS))
 		goto done;
 
@@ -155,7 +143,7 @@ static int tcs_invalidate(struct rsc_drv *drv, int type)
 	bitmap_zero(tcs->slots, MAX_TCS_SLOTS);
 
 done:
-	rpmh_spin_unlock(&drv->lock);
+	spin_unlock(&drv->lock);
 	return ret;
 }
 
@@ -419,7 +407,7 @@ static int tcs_write(struct rsc_drv *drv, const struct tcs_request *msg)
 	if (IS_ERR(tcs))
 		return PTR_ERR(tcs);
 
-	rpmh_spin_lock(&drv->lock);
+	spin_lock(&drv->lock);
 
 	if (msg->state == RPMH_ACTIVE_ONLY_STATE && drv->in_solver_mode) {
 		ret = -EINVAL;
@@ -449,7 +437,7 @@ static int tcs_write(struct rsc_drv *drv, const struct tcs_request *msg)
 	__tcs_trigger(drv, tcs_id, true);
 
 done_write:
-	rpmh_spin_unlock(&drv->lock);
+	spin_unlock(&drv->lock);
 	return ret;
 }
 
@@ -561,12 +549,12 @@ static int tcs_ctrl_write(struct rsc_drv *drv, const struct tcs_request *msg)
 	if (IS_ERR(tcs))
 		return PTR_ERR(tcs);
 
-	rpmh_spin_lock(&drv->lock);
+	spin_lock(&drv->lock);
 	/* find the TCS id and the command in the TCS to write to */
 	ret = find_slots(tcs, msg, &tcs_id, &cmd_id);
 	if (!ret)
 		__tcs_buffer_write(drv, tcs_id, cmd_id, msg);
-	rpmh_spin_unlock(&drv->lock);
+	spin_unlock(&drv->lock);
 
 	return ret;
 }
