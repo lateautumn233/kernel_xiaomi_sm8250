@@ -255,18 +255,6 @@ extern int msm_rules_update_path(struct list_head *input_list,
 				struct list_head *output_list);
 extern void print_all_rules(void);
 
-#define mbus_rpmh_rt_mutex_lock(lock)				\
-do {	\
-	if (!oops_in_progress)\
-		rt_mutex_lock(lock);	\
-} while (0)
-
-#define mbus_rpmh_rt_mutex_unlock(lock)				\
-do {	\
-	if (!oops_in_progress)\
-		rt_mutex_unlock(lock);	\
-} while (0)
-
 #ifdef CONFIG_DEBUG_BUS_VOTER
 int msm_bus_floor_init(struct device *dev);
 #else
