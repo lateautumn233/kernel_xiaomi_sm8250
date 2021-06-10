@@ -8,7 +8,7 @@
  *
  * Maple uses a first come first serve style algorithm with seperated read/write
  * handling to allow for read biases. By prioritizing reads, simple tasks should
- * improve in performance. Maple also uses msm_drm_notifier hooks to increase
+ * improve in performance. Maple also uses mi_drm_notifier hooks to increase
  * expirations when power is suspended to decrease workload.
  */
 #include <linux/blkdev.h>
@@ -17,7 +17,7 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/slab.h>
-#include <linux/msm_drm_notify.h>
+#include <drm/drm_notifier_mi.h>
 
 #define MAPLE_IOSCHED_PATCHLEVEL	(8)
 
@@ -48,7 +48,7 @@ struct maple_data {
    	int sleep_latency_multiple;
 
 	/* Display state */
-	struct notifier_block msm_drm_notif;
+	struct notifier_block mi_drm_notifier;
 	bool display_on;
 };
 
@@ -266,26 +266,21 @@ maple_latter_request(struct request_queue *q, struct request *rq)
 	return list_entry(rq->queuelist.next, struct request, queuelist);
 }
 
-static int msm_drm_notifier_cb(struct notifier_block *nb,
+static int mi_drm_notifier_cb(struct notifier_block *nb,
 			       unsigned long event, void *data)
 {
 	struct maple_data *mdata = container_of(nb, struct maple_data,
-						msm_drm_notif);
-	struct msm_drm_notifier *evdata = data;
+						mi_drm_notifier);
+	struct mi_drm_notifier *evdata = data;
 	int blank;
 
 	blank = *(int *)(evdata->data);
 	mdata->display_on=true;
 
- 	if (((blank == MSM_DRM_BLANK_POWERDOWN)
-		&& (event == MSM_DRM_EARLY_EVENT_BLANK))
-		|| (blank == MSM_DRM_BLANK_NORMAL))
-		mdata->display_on = false;
-
-	if ((blank == MSM_DRM_BLANK_UNBLANK_CUST)
-		&& (event == MSM_DRM_EARLY_EVENT_BLANK))
+if (blank == MI_DRM_BLANK_UNBLANK)
 		mdata->display_on = true;
-
+	else
+		mdata->display_on = false;
  	return 0;
 }
 
@@ -306,9 +301,9 @@ static int maple_init_queue(struct request_queue *q, struct elevator_type *e)
 	}
 	eq->elevator_data = mdata;
 
-	mdata->msm_drm_notif.notifier_call = msm_drm_notifier_cb;
-	mdata->msm_drm_notif.priority = INT_MAX;
-	msm_drm_register_client(&mdata->msm_drm_notif);
+	mdata->mi_drm_notifier.notifier_call = mi_drm_notifier_cb;
+	mdata->mi_drm_notifier.priority = INT_MAX;
+	mi_drm_register_client(&mdata->mi_drm_notifier);
 
 	/* Initialize fifo lists */
 	INIT_LIST_HEAD(&mdata->fifo_list[SYNC][READ]);
@@ -336,7 +331,7 @@ static void
 maple_exit_queue(struct elevator_queue *e)
 {
 	struct maple_data *mdata = e->elevator_data;
-	msm_drm_unregister_client(&mdata->msm_drm_notif);
+	mi_drm_unregister_client(&mdata->mi_drm_notifier);
 
 	/* Free structure */
 	kfree(mdata);
