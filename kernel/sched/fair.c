@@ -617,6 +617,7 @@ static void update_min_vruntime(struct cfs_rq *cfs_rq)
 #endif
 }
 
+#ifdef CONFIG_SCHED_WALT
 #ifdef CONFIG_PERF_HUMANTASK
 static inline bool jump_queue(struct task_struct *tsk, struct rb_node *root){
 	bool jump = false ;
@@ -642,6 +643,7 @@ out:
 	return jump;
 }
 #endif
+#endif
 /*
  * Enqueue an entity into the rb-tree:
  */
@@ -653,6 +655,7 @@ static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 	bool leftmost = true;
 	int left = 0;
 	int right = 0;
+#ifdef CONFIG_SCHED_WALT
 #ifdef CONFIG_PERF_HUMANTASK
 	bool  speed = false;
 	struct task_struct *tsk = NULL;
@@ -662,6 +665,7 @@ static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 	}
 	//CONFIG_HZ_300 *  jiffies_64; 100 = 1ms  < 10 ms ,50,100,200
 	if(speed) se->vruntime =  tsk->human_task * 1000000;
+#endif
 #endif
 
 	/*
@@ -683,11 +687,13 @@ static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			right++;
 		}
 	}
+#ifdef CONFIG_SCHED_WALT
 #ifdef CONFIG_PERF_HUMANTASK
 	if(speed){
 		//trace_sched_debug_einfo(tsk,"jumper left","right",left,right,se->vruntime,entry->vruntime,cfs_rq->min_vruntimex);
 		se->vruntime = entry ->vruntime  -1;
 	}
+#endif
 #endif
 	rb_link_node(&se->run_node, parent, link);
 	rb_insert_color_cached(&se->run_node,
