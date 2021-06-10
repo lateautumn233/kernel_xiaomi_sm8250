@@ -4001,7 +4001,11 @@ static inline bool cpu_is_in_target_set(struct task_struct *p, int cpu)
 	struct root_domain *rd = cpu_rq(cpu)->rd;
 	int first_cpu, next_usable_cpu;
 
+#ifdef CONFIG_SCHED_TUNE
 	if (schedtune_task_boost(p)) {
+#elif  CONFIG_UCLAMP_TASK
+	if (uclamp_boosted(p)) {
+#endif
 		first_cpu = rd->mid_cap_orig_cpu != -1 ? rd->mid_cap_orig_cpu :
 			    rd->max_cap_orig_cpu;
 
@@ -4035,11 +4039,19 @@ static inline bool task_fits_capacity(struct task_struct *p,
 	 * CPU.
 	 */
 	if (capacity_orig_of(task_cpu(p)) > capacity_orig_of(cpu))
+#ifdef CONFIG_SCHED_TUNE
 		margin = schedtune_task_boost(p) > 0 ?
+#elif  CONFIG_UCLAMP_TASK
+		margin = uclamp_boosted(p) > 0 ?
+#endif
 			sched_capacity_margin_down_boosted[task_cpu(p)] :
 			sched_capacity_margin_down[task_cpu(p)];
 	else
+#ifdef CONFIG_SCHED_TUNE
 		margin = schedtune_task_boost(p) > 0 ?
+#elif  CONFIG_UCLAMP_TASK
+		margin = uclamp_boosted(p) > 0 ?
+#endif
 			sched_capacity_margin_up_boosted[task_cpu(p)] :
 			sched_capacity_margin_up[task_cpu(p)];
 
@@ -5584,7 +5596,11 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se;
 	bool prefer_idle = sched_feat(EAS_PREFER_IDLE) ?
+#ifdef CONFIG_SCHED_TUNE
 				(schedtune_prefer_idle(p) > 0) : 0;
+#elif  CONFIG_UCLAMP_TASK
+				(uclamp_latency_sensitive(p) > 0) : 0;
+#endif
 	int idle_h_nr_running = idle_policy(p->policy);
 
 	/*
@@ -6306,7 +6322,11 @@ schedtune_cpu_margin_with(unsigned long util, int cpu, struct task_struct *p)
 
 long schedtune_task_margin(struct task_struct *task)
 {
+#ifdef CONFIG_SCHED_TUNE
 	int boost = schedtune_task_boost(task);
+#elif  CONFIG_UCLAMP_TASK
+	int boost = uclamp_boosted(task);
+#endif
 	unsigned long util;
 	long margin;
 
@@ -7084,7 +7104,11 @@ static int get_start_cpu(struct task_struct *p, bool sync_boost)
 	struct root_domain *rd = cpu_rq(smp_processor_id())->rd;
 	int start_cpu = rd->min_cap_orig_cpu;
 	int task_boost = per_task_boost(p);
+#ifdef CONFIG_SCHED_TUNE
 	bool boosted = schedtune_task_boost(p) > 0 ||
+#elif  CONFIG_UCLAMP_TASK
+	bool boosted = uclamp_boosted(p) > 0 ||
+#endif
 			task_boost_policy(p) == SCHED_BOOST_ON_BIG ||
 			task_boost == TASK_BOOST_ON_MID;
 	bool task_skip_min = task_skip_min_cpu(p);
@@ -7606,7 +7630,11 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 	if (target_cpu != -1 && !idle_cpu(target_cpu) &&
 			best_idle_cpu != -1) {
 		curr_tsk = READ_ONCE(cpu_rq(target_cpu)->curr);
+#ifdef CONFIG_SCHED_TUNE
 		if (curr_tsk && schedtune_task_boost_rcu_locked(curr_tsk))
+#elif  CONFIG_UCLAMP_TASK
+		if (curr_tsk && uclamp_boosted(curr_tsk))
+#endif
 			target_cpu = best_idle_cpu;
 	}
 
