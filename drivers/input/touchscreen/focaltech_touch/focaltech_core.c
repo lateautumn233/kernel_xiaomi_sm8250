@@ -97,7 +97,9 @@ extern int fts_charger_mode_set(struct i2c_client *client, bool on);
 *****************************************************************************/
 #define EVENT_INPUT 0x1
 extern void lpm_disable_for_dev(bool on, char event_dev);
+#ifdef CONFIG_CPU_BOOST
 extern void touch_irq_boost(void);
+#endif
 
 #ifndef CONFIG_FACTORY_BUILD
 static int fts_ts_clear_buffer(void);
@@ -952,7 +954,9 @@ static irqreturn_t fts_ts_interrupt(int irq, void *data)
 		FTS_ERROR("[INTR]: Invalid fts_ts_data");
 		return IRQ_HANDLED;
 	}
+#ifdef CONFIG_CPU_BOOST
 	touch_irq_boost();
+#endif
 
 #if FTS_ESDCHECK_EN
 	fts_esdcheck_set_intr(1);
