@@ -425,6 +425,8 @@ static inline int __init parse_acpi_topology(void)
 
 void __init init_cpu_topology(void)
 {
+	int cpu;
+
 	reset_cpu_topology();
 
 	/*
