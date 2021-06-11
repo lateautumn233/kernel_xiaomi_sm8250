@@ -97,7 +97,9 @@ static int32_t nvt_ts_resume(struct device *dev);
 extern int dsi_panel_lockdown_info_read(unsigned char *plockdowninfo);
 extern void dsi_panel_doubleclick_enable(bool on);
 static int32_t nvt_check_palm(uint8_t input_id, uint8_t *data);
+#ifdef CONFIG_CPU_BOOST
 extern void touch_irq_boost(void);
+#endif
 extern void lpm_disable_for_dev(bool on, char event_dev);
 extern void xiaomi_touch_send_btn_tap_key(int status);
 uint32_t ENG_RST_ADDR  = 0x7FFF80;
@@ -1460,8 +1462,10 @@ static irqreturn_t nvt_ts_work_func(int irq, void *data)
 		pm_wakeup_event(&ts->input_dev->dev, 5000);
 	}
 #endif
+#ifdef CONFIG_CPU_BOOST
 	if (ts->debug_flag == TOUCH_IRQ_BOOST)
 		touch_irq_boost();
+#endif
 
 	pm_qos_update_request(&ts_data->pm_touch_req, 100);
 	pm_qos_update_request(&ts_data->pm_spi_req, 100);
