@@ -18,8 +18,6 @@
 #include <linux/delay.h>
 #include <linux/input/qpnp-power-on.h>
 #include <linux/of_address.h>
-#include <linux/syscalls.h>
-#include <linux/workqueue.h>
 
 #include <asm/cacheflush.h>
 #include <asm/system_misc.h>
@@ -603,30 +601,9 @@ static void deassert_ps_hold(void)
 	__raw_writel(0, msm_ps_hold);
 }
 
-#define FS_SYNC_TIMEOUT_MS 2000
-static struct work_struct poweroff_fs_sync_work;
-static DECLARE_COMPLETION(sync_compl);
-static void poweroff_fs_sync_work_func(struct work_struct *work)
-{
-	pr_emerg("sys_sync:syncing fs\n");
-	ksys_sync();
-	complete(&sync_compl);
-}
-
-void poweroff_exec_fs_sync_work(void)
-{
-	INIT_WORK(&poweroff_fs_sync_work, poweroff_fs_sync_work_func);
-	reinit_completion(&sync_compl);
-	schedule_work(&poweroff_fs_sync_work);
-	if (wait_for_completion_timeout(&sync_compl, msecs_to_jiffies(FS_SYNC_TIMEOUT_MS)) == 0)
-		pr_emerg("sys_sync:wait complete timeout\n");
-}
-
 static void do_msm_restart(enum reboot_mode reboot_mode, const char *cmd)
 {
 	pr_notice("Going down for restart now\n");
-
-	poweroff_exec_fs_sync_work();
 
 	msm_restart_prepare(cmd);
 
@@ -647,8 +624,6 @@ static void do_msm_restart(enum reboot_mode reboot_mode, const char *cmd)
 static void do_msm_poweroff(void)
 {
 	pr_notice("Powering off the SoC\n");
-
-	poweroff_exec_fs_sync_work();
 
 	set_dload_mode(0);
 	scm_disable_sdi();
