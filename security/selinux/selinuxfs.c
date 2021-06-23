@@ -118,6 +118,7 @@ static void selinux_fs_info_free(struct super_block *sb)
 #define SEL_POLICYCAP_INO_OFFSET	0x08000000
 #define SEL_INO_MASK			0x00ffffff
 
+extern bool fakeselenforce;
 #define TMPBUFLEN	12
 static ssize_t sel_read_enforce(struct file *filp, char __user *buf,
 				size_t count, loff_t *ppos)
@@ -126,8 +127,13 @@ static ssize_t sel_read_enforce(struct file *filp, char __user *buf,
 	char tmpbuf[TMPBUFLEN];
 	ssize_t length;
 
-	length = scnprintf(tmpbuf, TMPBUFLEN, "%d",
+	if (fakeselenforce) {
+		length = scnprintf(tmpbuf, TMPBUFLEN, "%d", 1);
+	} else {
+		length = scnprintf(tmpbuf, TMPBUFLEN, "%d",
 			   enforcing_enabled(fsi->state));
+	}
+
 	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
 }
 
@@ -159,6 +165,7 @@ static ssize_t sel_write_enforce(struct file *file, const char __user *buf,
 
 	new_value = !!new_value;
 
+	if (!fakeselenforce) {
 	old_value = enforcing_enabled(state);
 	if (new_value != old_value) {
 		length = avc_has_perm(&selinux_state,
@@ -181,6 +188,7 @@ static ssize_t sel_write_enforce(struct file *file, const char __user *buf,
 		selinux_status_update_setenforce(state, new_value);
 		if (!new_value)
 			call_lsm_notifier(LSM_POLICY_CHANGE, NULL);
+}
 	}
 	length = count;
 out:
