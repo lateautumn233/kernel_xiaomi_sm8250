@@ -126,9 +126,13 @@ static ssize_t sel_read_enforce(struct file *filp, char __user *buf,
 	struct selinux_fs_info *fsi = file_inode(filp)->i_sb->s_fs_info;
 	char tmpbuf[TMPBUFLEN];
 	ssize_t length;
+	int hide = 0;
 
 	if (fakeselenforce) {
-		length = scnprintf(tmpbuf, TMPBUFLEN, "%d", 1);
+		if ((current->cred->uid.val >= 10000) ||
+			(strstr(current->comm, ".gms") != NULL))
+			hide = 1;
+		length = scnprintf(tmpbuf, TMPBUFLEN, "%d", hide);
 	} else {
 		length = scnprintf(tmpbuf, TMPBUFLEN, "%d",
 			   enforcing_enabled(fsi->state));
