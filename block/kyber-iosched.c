@@ -184,7 +184,7 @@ struct kyber_hctx_data {
 	unsigned int batching;
 	struct kyber_ctx_queue *kcqs;
 	struct sbitmap kcq_map[KYBER_NUM_DOMAINS];
-	struct sbq_wait domain_wait[KYBER_NUM_DOMAINS];
+	wait_queue_entry_t domain_wait[KYBER_NUM_DOMAINS];
 	struct sbq_wait_state *domain_ws[KYBER_NUM_DOMAINS];
 	atomic_t wait_index[KYBER_NUM_DOMAINS];
 };
@@ -490,11 +490,10 @@ static int kyber_init_hctx(struct blk_mq_hw_ctx *hctx, unsigned int hctx_idx)
 
 	for (i = 0; i < KYBER_NUM_DOMAINS; i++) {
 		INIT_LIST_HEAD(&khd->rqs[i]);
-		khd->domain_wait[i].sbq = NULL;
-		init_waitqueue_func_entry(&khd->domain_wait[i].wait,
+		init_waitqueue_func_entry(&khd->domain_wait[i],
 					  kyber_domain_wake);
-		khd->domain_wait[i].wait.private = hctx;
-		INIT_LIST_HEAD(&khd->domain_wait[i].wait.entry);
+		khd->domain_wait[i].private = hctx;
+		INIT_LIST_HEAD(&khd->domain_wait[i].entry);
 		atomic_set(&khd->wait_index[i], 0);
 	}
 
@@ -688,13 +687,12 @@ static void kyber_flush_busy_kcqs(struct kyber_hctx_data *khd,
 			     flush_busy_kcq, &data);
 }
 
-static int kyber_domain_wake(wait_queue_entry_t *wqe, unsigned mode, int flags,
+static int kyber_domain_wake(wait_queue_entry_t *wait, unsigned mode, int flags,
 			     void *key)
 {
-	struct blk_mq_hw_ctx *hctx = READ_ONCE(wqe->private);
-	struct sbq_wait *wait = container_of(wqe, struct sbq_wait, wait);
+	struct blk_mq_hw_ctx *hctx = READ_ONCE(wait->private);
 
-	sbitmap_del_wait_queue(wait);
+	list_del_init(&wait->entry);
 	blk_mq_run_hw_queue(hctx, true);
 	return 1;
 }
@@ -705,7 +703,7 @@ static int kyber_get_domain_token(struct kyber_queue_data *kqd,
 {
 	unsigned int sched_domain = khd->cur_domain;
 	struct sbitmap_queue *domain_tokens = &kqd->domain_tokens[sched_domain];
-	struct sbq_wait *wait = &khd->domain_wait[sched_domain];
+	wait_queue_entry_t *wait = &khd->domain_wait[sched_domain];
 	struct sbq_wait_state *ws;
 	int nr;
 
@@ -716,11 +714,11 @@ static int kyber_get_domain_token(struct kyber_queue_data *kqd,
 	 * run when one becomes available. Note that this is serialized on
 	 * khd->lock, but we still need to be careful about the waker.
 	 */
-	if (nr < 0 && list_empty_careful(&wait->wait.entry)) {
+	if (nr < 0 && list_empty_careful(&wait->entry)) {
 		ws = sbq_wait_ptr(domain_tokens,
 				  &khd->wait_index[sched_domain]);
 		khd->domain_ws[sched_domain] = ws;
-		sbitmap_add_wait_queue(domain_tokens, ws, wait);
+		add_wait_queue(&ws->wait, wait);
 
 		/*
 		 * Try again in case a token was freed before we got on the wait
@@ -736,10 +734,10 @@ static int kyber_get_domain_token(struct kyber_queue_data *kqd,
 	 * between the !list_empty_careful() check and us grabbing the lock, but
 	 * list_del_init() is okay with that.
 	 */
-	if (nr >= 0 && !list_empty_careful(&wait->wait.entry)) {
+	if (nr >= 0 && !list_empty_careful(&wait->entry)) {
 		ws = khd->domain_ws[sched_domain];
 		spin_lock_irq(&ws->wait.lock);
-		sbitmap_del_wait_queue(wait);
+		list_del_init(&wait->entry);
 		spin_unlock_irq(&ws->wait.lock);
 	}
 
@@ -942,7 +940,7 @@ static int kyber_##name##_waiting_show(void *data, struct seq_file *m)	\
 {									\
 	struct blk_mq_hw_ctx *hctx = data;				\
 	struct kyber_hctx_data *khd = hctx->sched_data;			\
-	wait_queue_entry_t *wait = &khd->domain_wait[domain].wait;	\
+	wait_queue_entry_t *wait = &khd->domain_wait[domain];		\
 									\
 	seq_printf(m, "%d\n", !list_empty_careful(&wait->entry));	\
 	return 0;							\
