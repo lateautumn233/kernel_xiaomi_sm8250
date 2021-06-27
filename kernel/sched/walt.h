@@ -19,9 +19,14 @@
  * rounding error when HZ=300.
  */
 #define DEFAULT_SCHED_RAVG_WINDOW (3333333 * 6)
-#else
-/* Default window size (in ns) = 20ms */
-#define DEFAULT_SCHED_RAVG_WINDOW 20000000
+
+#elif CONFIG_HZ_100
+/* Default window size (in ns) = 10ms */
+#define DEFAULT_SCHED_RAVG_WINDOW 10000000
+
+#elif CONFIG_HZ_1000
+/* Default window size (in ns) = 1ms */
+#define DEFAULT_SCHED_RAVG_WINDOW 1000000
 #endif
 
 /* Max window size (in ns) = 1s */
