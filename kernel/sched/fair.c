@@ -6993,8 +6993,7 @@ static inline bool get_rtg_status(struct task_struct *p)
 
 static inline bool task_skip_min_cpu(struct task_struct *p)
 {
-	return sched_boost() != CONSERVATIVE_BOOST &&
-		get_rtg_status(p) && p->unfilter;
+	return true;
 }
 
 static inline bool is_many_wakeup(int sibling_count_hint)
