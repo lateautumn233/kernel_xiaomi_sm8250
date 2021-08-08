@@ -2454,6 +2454,7 @@ static int fastrpc_internal_invoke(struct fastrpc_file *fl, uint32_t mode,
 		goto bail;
 
 	VERIFY(err, 0 == (err = ctx->retval));
+
 	if (err)
 		goto bail;
  bail:
