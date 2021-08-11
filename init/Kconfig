@@ -1204,6 +1204,14 @@ config STUNE_ASSIST
 	bool "SchedTune configuration helper"
 	depends on SCHED_TUNE
 	depends on ANDROID
+
+config CPUINFO_CACHED_FREQ_TASKS
+	string "Default task names for cached-frequency info enforcement"
+	help
+	  This feature allow us to specify the default values of which libraries
+	  or tasks that are being enforced to showed a cached-frequency instead
+	  of the actual policy.
+
 	help
 	  This option enables in-kernel overrides for SchedTune values.
 
