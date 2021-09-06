@@ -9,6 +9,7 @@
 #include <linux/freezer.h>
 #include <linux/kthread.h>
 #include <linux/mm.h>
+#include <linux/swap.h>
 #include <linux/rtmutex.h>
 #include <linux/sched.h>
 #include <uapi/linux/sched/types.h>
@@ -167,6 +168,10 @@ static unsigned long ion_heap_shrink_scan(struct shrinker *shrinker,
 					  struct shrink_control *sc)
 {
 	struct ion_heap *heap = container_of(shrinker, typeof(*heap), shrinker);
+
+	if (current->reclaim_state) {
+		current->reclaim_state->reclaimed_slab += (unsigned long)freed;
+	}
 
 	if (heap->ops->shrink)
 		return heap->ops->shrink(heap, sc->gfp_mask, sc->nr_to_scan);
