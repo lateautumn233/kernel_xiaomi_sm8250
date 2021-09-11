@@ -768,6 +768,7 @@ static int _sde_connector_update_dirty_properties(
 	return 0;
 }
 
+#ifdef CONFIG_OSSFOD
 void sde_connector_update_fod_hbm(struct drm_connector *connector)
 {
 	static atomic_t effective_status = ATOMIC_INIT(false);
@@ -800,6 +801,7 @@ void sde_connector_update_fod_hbm(struct drm_connector *connector)
 	dsi_panel_set_fod_hbm(display->panel, status);
 	mutex_unlock(&display->panel->panel_lock);
 }
+#endif
 
 struct sde_connector_dyn_hdr_metadata *sde_connector_get_dyn_hdr_meta(
 		struct drm_connector *connector)
@@ -1181,7 +1183,9 @@ int sde_connector_pre_kickoff(struct drm_connector *connector)
 	/* fingerprint hbm fence */
 	_sde_connector_mi_dimlayer_hbm_fence(connector);
 
+#ifdef CONFIG_OSSFOD
 	sde_connector_update_fod_hbm(connector);
+#endif
 
 	rc = c_conn->ops.pre_kickoff(connector, c_conn->display, &params);
 

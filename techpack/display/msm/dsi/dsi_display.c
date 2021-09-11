@@ -40,7 +40,9 @@ DEFINE_MUTEX(dsi_display_clk_mutex);
 
 extern int mi_disp_lhbm_attach_primary_dsi_display(struct dsi_display *display);
 
+#ifdef CONFIG_OSSFOD
 struct dsi_display *primary_display;
+#endif
 
 static char dsi_display_primary[MAX_CMDLINE_PARAM_LEN];
 static char dsi_display_secondary[MAX_CMDLINE_PARAM_LEN];
@@ -6732,7 +6734,9 @@ int dsi_display_get_modes(struct dsi_display *display,
 exit:
 	*out_modes = display->modes;
 	rc = 0;
+#ifdef CONFIG_OSSFOD
 	primary_display = display;
+#endif
 
 error:
 	if (rc)
@@ -8315,9 +8319,12 @@ int dsi_display_unprepare(struct dsi_display *display)
 	return rc;
 }
 
-struct dsi_display *get_main_display(void) {
+#ifdef CONFIG_OSSFOD
+struct dsi_display *get_main_display(void)
+{
 	return primary_display;
 }
+#endif
 
 static int __init dsi_display_register(void)
 {
