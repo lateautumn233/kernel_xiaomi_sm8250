@@ -144,3 +144,4 @@ kernel.log
 
 # Output dir
 out
+build.sh
