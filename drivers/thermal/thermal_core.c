@@ -1799,9 +1799,9 @@ cpu_limits_store(struct device *dev,
 		pr_err("input param error, can not prase param\n");
 		return -EINVAL;
 	}
-
+#ifdef CONFIG_CPU_THERMAL
 	cpu_limits_set_level(cpu, max);
-
+#endif
 	return len;
 }
 
