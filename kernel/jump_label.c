@@ -217,7 +217,6 @@ static bool static_key_slow_try_dec(struct static_key *key)
 	 * returns is unbalanced, because all other static_key_slow_inc()
 	 * instances block while the update is in progress.
 	 */
-	WARN(val < 0, "jump label: negative count!\n");
 	return true;
 }
 

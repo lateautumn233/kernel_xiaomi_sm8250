@@ -168,7 +168,7 @@ static void alarmtimer_enqueue(struct alarm_base *base, struct alarm *alarm)
 	if (alarm->state & ALARMTIMER_STATE_ENQUEUED)
 		timerqueue_del(&base->timerqueue, &alarm->node);
 
-	pr_info("alarmtimer_enqueue: comm:%s pid:%d exp:%llu func:%pf\n",
+	pr_info_ratelimited("alarmtimer_enqueue: comm:%s pid:%d exp:%llu func:%pf\n",
 		current->comm, current->pid,
 		ktime_to_ms(alarm->node.expires), alarm->function);
 		//WARN(1, "alarmtimer_enqueue:   %llu", ktime_to_ms(alarm->node.expires));
