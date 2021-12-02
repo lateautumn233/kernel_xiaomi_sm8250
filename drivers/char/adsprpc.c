@@ -2789,6 +2789,7 @@ bail:
 	return err;
 }
 
+#ifdef CONFIG_DEBUG_FS
 static int fastrpc_send_cpuinfo_to_dsp(struct fastrpc_file *fl)
 {
 	int err = 0;
@@ -2822,6 +2823,7 @@ static int fastrpc_send_cpuinfo_to_dsp(struct fastrpc_file *fl)
 bail:
 	return err;
 }
+#endif
 
 static int fastrpc_get_info_from_dsp(struct fastrpc_file *fl,
 				uint32_t *dsp_attr_buf,
@@ -4208,8 +4210,10 @@ static int fastrpc_internal_control(struct fastrpc_file *fl,
 					struct fastrpc_ioctl_control *cp)
 {
 	int err = 0;
+#ifdef CONFIG_DEBUG_FS
 	struct fastrpc_apps *me = &gfa;
 	u32 len = me->silvercores.corecount, i = 0;
+#endif
 
 	VERIFY(err, !IS_ERR_OR_NULL(fl) && !IS_ERR_OR_NULL(fl->apps));
 	if (err)
