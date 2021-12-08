@@ -168,10 +168,6 @@ static void alarmtimer_enqueue(struct alarm_base *base, struct alarm *alarm)
 	if (alarm->state & ALARMTIMER_STATE_ENQUEUED)
 		timerqueue_del(&base->timerqueue, &alarm->node);
 
-	pr_info("alarmtimer_enqueue: comm:%s pid:%d exp:%llu func:%pf\n",
-		current->comm, current->pid,
-		ktime_to_ms(alarm->node.expires), alarm->function);
-		//WARN(1, "alarmtimer_enqueue:   %llu", ktime_to_ms(alarm->node.expires));
 	timerqueue_add(&base->timerqueue, &alarm->node);
 	alarm->state |= ALARMTIMER_STATE_ENQUEUED;
 }
@@ -216,7 +212,6 @@ static enum hrtimer_restart alarmtimer_fired(struct hrtimer *timer)
 	alarmtimer_dequeue(base, alarm);
 	spin_unlock_irqrestore(&base->lock, flags);
 
-	pr_info("[oem][alarm]: type=%d, func=%pf\n", alarm->type, alarm->function);
 	if (alarm->function)
 		restart = alarm->function(alarm, base->gettime());
 
