@@ -1802,7 +1802,9 @@ cpu_limits_store(struct device *dev,
 		return -EINVAL;
 	}
 
+#ifdef CONFIG_CPU_THERMAL
 	cpu_limits_set_level(cpu, max);
+#endif 
 
 	return len;
 }
