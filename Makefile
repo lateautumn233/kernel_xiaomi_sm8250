@@ -702,6 +702,9 @@ KBUILD_CFLAGS   += -O2
 KBUILD_AFLAGS   += -O2
 KBUILD_LDFLAGS  += -O2
 endif
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS	+= $(call cc-option, -mcpu=cortex-a76 -mtune=cortex-a76)
+endif
 
 # Enable Clang Polly optimizations
 KBUILD_CFLAGS	+= -mllvm -polly \
