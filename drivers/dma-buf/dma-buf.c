@@ -124,7 +124,6 @@ static void dma_buf_release(struct dentry *dentry)
 {
 	struct dma_buf *dmabuf;
 	int dtor_ret = 0;
-    pid_t tgid = task_tgid_nr(current);
 
 	dmabuf = dentry->d_fsdata;
 
@@ -155,8 +154,6 @@ static void dma_buf_release(struct dentry *dentry)
 	else
 		pr_warn_ratelimited("Leaking dmabuf %s because destructor failed error:%d\n",
 				    dmabuf->buf_name, dtor_ret);
-
-	trace_dma_buf_release(inode, file, tgid);
 
 	dma_buf_ref_destroy(dmabuf);
 
