@@ -18,7 +18,7 @@
  * Tick interval becomes to 3333333 due to
  * rounding error when HZ=300.
  */
-#define DEFAULT_SCHED_RAVG_WINDOW (3333333 * 6)
+#define DEFAULT_SCHED_RAVG_WINDOW (3333333 * 3)
 
 #elif CONFIG_HZ_100
 /* Default window size (in ns) = 10ms */
