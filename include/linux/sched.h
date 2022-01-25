@@ -29,6 +29,7 @@
 #include <linux/mm_event.h>
 #include <linux/task_io_accounting.h>
 #include <linux/rseq.h>
+#include <linux/pkg_stat.h>
 
 /* task_struct member predeclarations (sorted alphabetically): */
 struct audit_context;
@@ -1520,6 +1521,10 @@ struct task_struct {
 
 	ANDROID_KABI_RESERVE(7);
 	ANDROID_KABI_RESERVE(8);
+
+#ifdef CONFIG_MIGT
+	struct package_runtime_info pkg;
+#endif
 
 	/*
 	 * New fields for task_struct should be added above here, so that
