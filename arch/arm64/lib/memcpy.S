@@ -56,10 +56,10 @@
    The loop tail is handled by always copying 64 bytes from the end.
 */
 
-SYM_FUNC_START_ALIAS(__memmove)
-SYM_FUNC_START_WEAK_ALIAS_PI(memmove)
-SYM_FUNC_START_ALIAS(__memcpy)
-SYM_FUNC_START_WEAK_PI(memcpy)
+ENTRY(__memmove)
+WEAK(memmove)
+ENTRY(__memcpy)
+WEAK(memcpy)
 	add	srcend, src, count
 	add	dstend, dstin, count
 	cmp	count, 128
@@ -241,11 +241,7 @@ L(copy64_from_start):
 	stp	C_l, C_h, [dstin]
 	ret
 
-SYM_FUNC_END_PI(memcpy)
-EXPORT_SYMBOL(memcpy)
-SYM_FUNC_END_ALIAS(__memcpy)
-EXPORT_SYMBOL(__memcpy)
-SYM_FUNC_END_ALIAS_PI(memmove)
-EXPORT_SYMBOL(memmove)
-SYM_FUNC_END_ALIAS(__memmove)
-EXPORT_SYMBOL(__memmove)
+ENDPIPROC(memcpy)
+ENDPROC(__memcpy)
+ENDPIPROC(memmove)
+ENDPROC(__memmove)
