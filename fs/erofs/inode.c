@@ -27,7 +27,8 @@ static struct page *erofs_read_inode(struct inode *inode,
 	unsigned int ifmt;
 	int err;
 
-	vi->data_mapping_mode = __inode_data_mapping(advise);
+	blkaddr = erofs_blknr(inode_loc);
+	*ofs = erofs_blkoff(inode_loc);
 
 	erofs_dbg("%s, reading inode nid %llu at %u of blkaddr %u",
 		  __func__, vi->nid, *ofs, blkaddr);
@@ -152,11 +153,9 @@ static struct page *erofs_read_inode(struct inode *inode,
 		i_gid_write(inode, le16_to_cpu(dic->i_gid));
 		set_nlink(inode, le16_to_cpu(dic->i_nlink));
 
-		/* use build time to derive all file time */
-		inode->i_mtime.tv_sec = inode->i_ctime.tv_sec =
-			sbi->build_time;
-		inode->i_mtime.tv_nsec = inode->i_ctime.tv_nsec =
-			sbi->build_time_nsec;
+		/* use build time for compact inodes */
+		inode->i_ctime.tv_sec = sbi->build_time;
+		inode->i_ctime.tv_nsec = sbi->build_time_nsec;
 
 		inode->i_size = le32_to_cpu(dic->i_size);
 		if (erofs_inode_is_data_compressed(vi->datalayout))
@@ -234,10 +233,8 @@ static int erofs_fill_inode(struct inode *inode, int isdir)
 {
 	struct erofs_inode *vi = EROFS_I(inode);
 	struct page *page;
-	void *data;
-	int err;
-	erofs_blk_t blkaddr;
-	unsigned ofs;
+	unsigned int ofs;
+	int err = 0;
 
 	trace_erofs_fill_inode(inode, isdir);
 
