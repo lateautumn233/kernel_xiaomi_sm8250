@@ -1376,6 +1376,14 @@ struct task_struct {
 	 */
 	u64				timer_slack_ns;
 	u64				default_timer_slack_ns;
+#if IS_ENABLED(CONFIG_MIHW)
+	unsigned int			top_app;
+	unsigned int			inherit_top_app;
+#endif
+#if IS_ENABLED(CONFIG_PERF_HUMANTASK)
+	unsigned int                    human_task;
+	unsigned int			cpux;
+#endif
 
 #ifdef CONFIG_KASAN
 	unsigned int			kasan_depth;
@@ -1478,6 +1486,15 @@ struct task_struct {
 #endif
 #ifdef CONFIG_ANDROID_SIMPLE_LMK
 	struct task_struct		*simple_lmk_next;
+#endif
+
+#if IS_ENABLED(CONFIG_KPERFEVENTS)
+	/* lock to protect kperfevents */
+	rwlock_t kperfevents_lock;
+	/* perfevents of current task, only effective for group leader.
+	 * accessible for all tasks in one group.
+	 */
+	void *kperfevents;
 #endif
 
 	/* task is frozen/stopped (used by the cgroup freezer) */
@@ -2262,4 +2279,16 @@ static inline void set_wake_up_idle(bool enabled)
 		current->flags &= ~PF_WAKE_UP_IDLE;
 }
 
+#if IS_ENABLED(CONFIG_MIHW)
+extern inline bool is_critical_task(struct task_struct *p);
+
+extern inline bool is_top_app(struct task_struct *p);
+
+extern inline bool is_inherit_top_app(struct task_struct *p);
+
+#define INHERIT_DEPTH 2
+extern inline void set_inherit_top_app(struct task_struct *p,
+					struct task_struct *from);
+extern inline void restore_inherit_top_app(struct task_struct *p);
+#endif /* CONFIG_MIHW */
 #endif

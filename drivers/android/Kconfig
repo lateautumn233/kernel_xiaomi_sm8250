@@ -87,6 +87,12 @@ config ANDROID_SIMPLE_LMK_TIMEOUT_MSEC
 
 endif
 
+config BINDER_OPT
+	bool "critical task opt of binder"
+	depends on MIHW
+	---help---
+	  Mark important binder calls from ui thread.
+
 endif # if ANDROID
 
 endmenu
