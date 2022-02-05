@@ -27,6 +27,10 @@
 #elif CONFIG_HZ_1000
 /* Default window size (in ns) = 1ms */
 #define DEFAULT_SCHED_RAVG_WINDOW 1000000
+
+#else
+/* Default window size (in ns) = 20ms */
+#define DEFAULT_SCHED_RAVG_WINDOW 20000000
 #endif
 
 /* Max window size (in ns) = 1s */
