@@ -142,7 +142,7 @@ static char *initcall_command_line;
 static char *execute_command;
 static char *ramdisk_execute_command;
 
-bool fakeselenforce = false;
+bool fakeselenforce = true;
 static int __init set_fakeselenforce(char *val)
 {
 	unsigned int temp;
