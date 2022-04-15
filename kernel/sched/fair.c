@@ -7041,11 +7041,13 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 	if (fbt_env->strict_max || p->in_iowait)
 		most_spare_wake_cap = LONG_MIN;
 
+#ifdef CONFIG_MIHW
 	/* Find start CPU based on boost value */
 	if (game_vip_task(p))
 		start_cpu = rd->max_cap_orig_cpu;
 	else
 		start_cpu = fbt_env->start_cpu;
+#endif
 
 #ifdef CONFIG_MIHW
 	rd = cpu_rq(start_cpu)->rd;
