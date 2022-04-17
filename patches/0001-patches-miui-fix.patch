@@ -1,0 +1,135 @@
+From 78c8681c03c662e0d6c63f13e501fdfe766c8e37 Mon Sep 17 00:00:00 2001
+From: lateautumn233 <3487467850@qq.com>
+Date: Sun, 17 Apr 2022 15:16:04 +0800
+Subject: [PATCH] patches: miui fix
+
+---
+ .../dts/vendor/qcom/dsi-panel-g7a-36-02-0c-dsc-video.dtsi     | 4 ++--
+ .../dts/vendor/qcom/dsi-panel-g7a-37-02-0a-dsc-video.dtsi     | 4 ++--
+ .../dts/vendor/qcom/dsi-panel-g7a-37-02-0b-dsc-video.dtsi     | 4 ++--
+ .../dts/vendor/qcom/dsi-panel-j3s-37-02-0a-dsc-video.dtsi     | 4 ++--
+ .../boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-cmd.dtsi      | 2 +-
+ .../boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-video.dtsi    | 2 +-
+ .../vendor/qcom/dsi-panel-sw43404-amoled-dsc-wqhd-cmd.dtsi    | 2 +-
+ 7 files changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-36-02-0c-dsc-video.dtsi b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-36-02-0c-dsc-video.dtsi
+index e17ca74147cd..becc38ec999c 100644
+--- a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-36-02-0c-dsc-video.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-36-02-0c-dsc-video.dtsi
+@@ -53,13 +53,13 @@
+ 			17000 15500 30000 8000 3000>;
+ 		qcom,mdss-dsi-panel-peak-brightness = <4200000>;
+ 		qcom,mdss-dsi-panel-blackness-level = <3230>;
+-		//qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
++		////qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
+ 
+ 		qcom,mdss-dsi-pan-enable-dynamic-fps;
+ 		qcom,mdss-dsi-pan-enable-smart-fps;
+ 		qcom,mdss-dsi-pan-fps-update =
+ 			"dfps_immediate_porch_mode_vfp";
+-		qcom,dsi-supported-dfps-list = <120 90 60 50 30>;
++		qcom,dsi-supported-dfps-list = <120 90 60 50 30 50 30>;
+ 
+ 		qcom,mdss-dsi-display-timings {
+ 			timing@0{
+diff --git a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0a-dsc-video.dtsi b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0a-dsc-video.dtsi
+index 2c1149725fe7..7311726e2bcc 100644
+--- a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0a-dsc-video.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0a-dsc-video.dtsi
+@@ -53,13 +53,13 @@
+ 			17000 15500 30000 8000 3000>;
+ 		qcom,mdss-dsi-panel-peak-brightness = <4200000>;
+ 		qcom,mdss-dsi-panel-blackness-level = <3230>;
+-		//qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
++		////qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
+ 
+ 		qcom,mdss-dsi-pan-enable-dynamic-fps;
+ 		qcom,mdss-dsi-pan-enable-smart-fps;
+ 		qcom,mdss-dsi-pan-fps-update =
+ 			"dfps_immediate_porch_mode_vfp";
+-		qcom,dsi-supported-dfps-list = <120 90 60 50 30>;
++		qcom,dsi-supported-dfps-list = <120 90 60 50 30 50 30>;
+ 
+ 		qcom,mdss-dsi-display-timings {
+ 			timing@0{
+diff --git a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0b-dsc-video.dtsi b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0b-dsc-video.dtsi
+index ffcd82e2904b..670db2b550a1 100644
+--- a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0b-dsc-video.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-g7a-37-02-0b-dsc-video.dtsi
+@@ -53,13 +53,13 @@
+ 			17000 15500 30000 8000 3000>;
+ 		qcom,mdss-dsi-panel-peak-brightness = <4200000>;
+ 		qcom,mdss-dsi-panel-blackness-level = <3230>;
+-		//qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
++		////qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
+ 
+ 		qcom,mdss-dsi-pan-enable-dynamic-fps;
+ 		qcom,mdss-dsi-pan-enable-smart-fps;
+ 		qcom,mdss-dsi-pan-fps-update =
+ 			"dfps_immediate_porch_mode_vfp";
+-		qcom,dsi-supported-dfps-list = <120 90 60 50 30>;
++		qcom,dsi-supported-dfps-list = <120 90 60 50 30 50 30>;
+ 
+ 		qcom,mdss-dsi-display-timings {
+ 			timing@0{
+diff --git a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-j3s-37-02-0a-dsc-video.dtsi b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-j3s-37-02-0a-dsc-video.dtsi
+index 50491ea78ddd..c117e2ca1700 100644
+--- a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-j3s-37-02-0a-dsc-video.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-j3s-37-02-0a-dsc-video.dtsi
+@@ -52,11 +52,11 @@
+ 			17000 15500 30000 8000 3000>;
+ 		qcom,mdss-dsi-panel-peak-brightness = <4200000>;
+ 		qcom,mdss-dsi-panel-blackness-level = <3230>;
+-		//qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
++		////qcom,mdss-dsi-qsync-min-refresh-rate = <60>;
+ 		qcom,mdss-dsi-pan-enable-dynamic-fps;
+ 		qcom,mdss-dsi-pan-fps-update =
+ 				"dfps_immediate_porch_mode_vfp";
+-		qcom,dsi-supported-dfps-list = <144 120 90 60 50 48 30>;
++		qcom,dsi-supported-dfps-list = <144 120 90 60 50 48 30 50 48 30>;
+ 
+ 		qcom,mdss-dsi-display-timings {
+ 			timing@0{
+diff --git a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-cmd.dtsi b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-cmd.dtsi
+index bddaf37f0522..0ff9d47e1910 100755
+--- a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-cmd.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-cmd.dtsi
+@@ -35,7 +35,7 @@
+ 		qcom,mdss-dsi-te-using-wd;
+ 		qcom,mdss-dsi-te-using-te-pin;
+ 		qcom,panel-ack-disabled;
+-		//qcom,mdss-dsi-qsync-min-refresh-rate = <45>;
++		////qcom,mdss-dsi-qsync-min-refresh-rate = <45>;
+ 
+ 		qcom,mdss-dsi-display-timings {
+ 			timing@0 {
+diff --git a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-video.dtsi b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-video.dtsi
+index f44bb450ace8..7ee13882b57a 100755
+--- a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-video.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sim-dualmipi-video.dtsi
+@@ -24,7 +24,7 @@
+ 		qcom,mdss-dsi-mdp-trigger = "none";
+ 		qcom,mdss-dsi-reset-sequence = <1 20>, <0 200>, <1 20>;
+ 		qcom,panel-ack-disabled;
+-		//qcom,mdss-dsi-qsync-min-refresh-rate = <45>;
++		////qcom,mdss-dsi-qsync-min-refresh-rate = <45>;
+ 
+ 		qcom,mdss-dsi-display-timings {
+ 			timing@0 {
+diff --git a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sw43404-amoled-dsc-wqhd-cmd.dtsi b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sw43404-amoled-dsc-wqhd-cmd.dtsi
+index 0652558562d0..e99536e79aeb 100755
+--- a/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sw43404-amoled-dsc-wqhd-cmd.dtsi
++++ b/arch/arm64/boot/dts/vendor/qcom/dsi-panel-sw43404-amoled-dsc-wqhd-cmd.dtsi
+@@ -36,7 +36,7 @@
+ 			17000 15500 30000 8000 3000>;
+ 		qcom,mdss-dsi-panel-peak-brightness = <4200000>;
+ 		qcom,mdss-dsi-panel-blackness-level = <3230>;
+-		//qcom,mdss-dsi-qsync-min-refresh-rate = <55>;
++		////qcom,mdss-dsi-qsync-min-refresh-rate = <55>;
+ 
+ 		qcom,mdss-dsi-display-timings {
+ 			timing@0 {
+-- 
+2.34.1
+
