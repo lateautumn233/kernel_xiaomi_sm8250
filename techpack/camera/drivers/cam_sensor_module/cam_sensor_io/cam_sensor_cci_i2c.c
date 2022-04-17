@@ -171,7 +171,9 @@ static int32_t cam_cci_i2c_compare(struct cam_sensor_cci_client *client,
 		addr_type, data_type);
 	if (rc < 0)
 		return rc;
+	//add by baichunyu@xiaomi.com
 	CAM_DBG(CAM_SENSOR, "addr %04x, %04x,compare data = %d", addr, reg_data, (int16_t)reg_data);
+	//add by baichunyu@xiaomi.com
 
 	reg_data = reg_data & 0xFFFFFFFF;
 	if (data == (reg_data & ~data_mask))
