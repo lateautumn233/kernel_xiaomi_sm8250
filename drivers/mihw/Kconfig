@@ -5,7 +5,7 @@ config MILLET
 	  Mi frozen function
 
 config MIGT
-	bool "smart sched"
+        bool "boost cpufreq when load high"
 	depends on MIHW
-	help
-	  Boost cpufreq when current frame drawing time too long
+        help
+          Boost cpufreq when current frame drawing time too long
