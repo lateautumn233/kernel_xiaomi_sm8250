@@ -7077,7 +7077,7 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 	unsigned long best_active_util = ULONG_MAX;
 	unsigned long best_active_cuml_util = ULONG_MAX;
 	unsigned long best_idle_cuml_util = ULONG_MAX;
-	bool prefer_idle = schedtune_prefer_idle(p);
+	bool prefer_idle;
 	bool boosted;
 	/* Initialise with deepest possible cstate (INT_MAX) */
 	int shallowest_idle_cstate = INT_MAX;
@@ -7108,7 +7108,8 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 	 * performance CPU, thus requiring to maximise target_capacity. In this
 	 * case we initialise target_capacity to 0.
 	 */
-	prefer_idle = uclamp_latency_sensitive(p);
+	prefer_idle = uclamp_latency_sensitive(p) ||
+		schedtune_prefer_idle(p) > 0 || game_vip_task(p);
 	boosted = fbt_env->boosted || uclamp_boosted(p);
 	if (prefer_idle && boosted)
 		target_capacity = 0;
@@ -7117,8 +7118,12 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 		most_spare_wake_cap = LONG_MIN;
 
 	/* Find start CPU based on boost value */
-	start_cpu = fbt_env->start_cpu;
-#if IS_ENABLED(CONFIG_MIHW)
+	if (game_vip_task(p))
+		start_cpu = rd->max_cap_orig_cpu;
+	else
+		start_cpu = fbt_env->start_cpu;
+
+#ifdef CONFIG_MIHW
 	rd = cpu_rq(start_cpu)->rd;
 #endif
 	/* Find SD for the start CPU */
@@ -7438,6 +7443,11 @@ static void find_best_target(struct sched_domain *sd, cpumask_t *cpus,
 					continue;
 			}
 
+			if (game_vip_task(p) &&
+			   (best_idle_cpu != -1 || target_cpu != -1 ||
+			   best_active_cpu != -1))
+				break;
+
 			target_max_spare_cap = spare_cap;
 			target_capacity = capacity_orig;
 			target_nr_rtg_high_prio = walt_nr_rtg_high_prio(i);
@@ -7740,13 +7750,16 @@ static void select_cpu_candidates(struct sched_domain *sd, cpumask_t *cpus,
 {
 	int highest_spare_cap_cpu = prev_cpu, best_idle_cpu = -1;
 	unsigned long spare_cap, max_spare_cap, util, cpu_cap;
-	bool prefer_idle = uclamp_latency_sensitive(p);
+	bool prefer_idle;
 	bool boosted = uclamp_boosted(p);
 	unsigned long target_cap = boosted ? 0 : ULONG_MAX;
 	unsigned long highest_spare_cap = 0;
 	unsigned int min_exit_lat = UINT_MAX;
 	int cpu, max_spare_cap_cpu;
 	struct cpuidle_state *idle;
+
+	prefer_idle = uclamp_latency_sensitive(p) ||
+		schedtune_prefer_idle(p) > 0 || game_vip_task(p);
 
 	for (; pd; pd = pd->next) {
 		max_spare_cap_cpu = -1;
